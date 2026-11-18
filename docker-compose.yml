@@ -1,0 +1,37 @@
+version: '3.8'
+services:
+  mongo:
+    image: mongo:7
+    container_name: shopsphere-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+
+  server:
+    build: ./server
+    container_name: shopsphere-server
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/ecommerce_db
+      - JWT_SECRET=shopsphere_super_secret_key_2024
+      - JWT_EXPIRES_IN=7d
+      - FRONTEND_URL=http://localhost:5173
+    depends_on:
+      - mongo
+    restart: unless-stopped
+
+  client:
+    build: ./client
+    container_name: shopsphere-client
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+    restart: unless-stopped
+
+volumes:
+  mongo_data:
+
